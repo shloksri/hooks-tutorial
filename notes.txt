@@ -1,0 +1,191 @@
+Why hooks?
+Reason set 1
+1. understand how "this" keyword works.
+2. remember to bind event handlers in class components
+3. classes dont minify very well and make hot reloading very unreliable.
+
+Reason set 2
+1. there is no particular way to reuse the stateful component logic
+2. HOC and render props patterns do address this problem, but it becomes harder to follow
+3. There is a need to share stateful logic in a better way.
+
+Reason set 3
+
+Q? Why hooks better than classes
+Q? - How does a react app loads and how does it work?
+
+
+Advantages of hooks
+-Hooks dont use this keyword
+-reuse stateful logic
+- organize logic inside component into reusable isolated units
+
+Rules of hooks:
+1. only call hooks at top level - dnt call them inside loops, conditions, or nested functions
+2. only call hooks from React functions - functional components, and not any regular JS function
+
+=====================================
+useState :
+
+--> Always use prevState to update state. that way it's safer. But why is it safer ? Q?
+
+-- In case of objects, setState will merge the state, useState will not. you have to do it manually.
+
+Notes:
+1. In classes, the state is always an object, but with useState hook, the state can be anything - number, array, boolean, object, etc.
+2. The useState hook returns an array with 2 elements: 
+the first element is current value of state,
+the second element is state setter function
+
+3. You can also use the previous state by passing a value to the "setter function".
+Parentnd then call the setter function.
+=====================================
+
+useEffect:
+Parentccording to increase counter
+- useEffect let’s u perform side effects in functional components
+- It’s a close replacement for componentDidMount, componentDidUpdate, componentWillUnmount
+
+
+==lifecycle methods:
+
+4 stages:
+1. Mounting - when an instance of component is being created and inserted into the DOM
+2. Updating - when component is being re-rendered, because of change in props or state.
+3. Unmounting - when component is being removed from DOM.
+4. Error Handling - when there is an error during rendering, in a lifecycle method or constructor of any child component.
+
+1. Mounting:
+    constructor
+    static getDerivedStateFromProps
+    render
+    componentDidMount
+
+2. Updating
+    static getDerivedStateFromProps,
+    shouldComponentUpdate,
+    render,
+    getSnapShotBeforeUpdate,
+    componentDidUpdate
+
+3. Unmounting
+    componentWillUnmount
+
+4. Error Handling
+    static getDerivedStateFromError,
+    componentDidCatch
+
+
+=======================================================
+1. Mounting:
+    constructor
+    static getDerivedStateFromProps
+    render
+    componentDidMount
+----------------------------------
+a. constructor:
+--It is a special function which will get called whenever a new component is created.
+-- Used for 
+    - initializing the state,
+    - binding the event handlers
+
+-- Never cause side effects in it - like calling HTTP requests.
+
+-- super(props):
+we can only access "this.props" if we have called the super() method in constructor, else we cant call.
+
+-- we can directly chane the state by doing this.state = "something" in the constructor.
+but in all other scenarios, we have to use this.setState() to change the value of the state.
+----------------------------------
+
+b.  static getDerivedStateFromProps
+
+- rarely used method.
+- used when state of the component depends on changes in the props passed to it. here, we can use this method to "set the state".
+- since it is static, it doesn't have access to this keyword.
+- dont cause side effects here.
+- either returns an object with updated state, or null.
+
+c. render()
+- only required method
+- reads props and state, returns JSX
+- dont change state, interact with DOM, make ajax calls
+- children components lifecycle methods are also executed.
+
+
+d. componentDidMount()
+- called only once in the whole lifecycle of the given component
+- invoked immediately after a component and all its children have been rendered into the DOM.
+- we can cause side effects here - AJAX calls, interact with DOM, etc.
+
+Order of execution during the mounting phase:
+
+Parent constructor
+Parent getDerivedStateFromProps
+Parent render
+    Child constructor
+    Child getDerivedStateFromProps
+    Child render
+    Child componentDidMount
+Parent componentDidMount
+
+=======================================================
+2. Updating
+
+By default, All components will re-render when they receive props, or when their state changes.
+
+a. static getDerivedStateFromProps,
+
+b. shouldComponentUpdate(nextprops, nextState): 
+
+- rarely used
+- dictates whether the component should update or not.
+-  By default, All components will re-render when they receive props, or when their state changes.
+- this method can prevent that default behavior by returning false.
+- dont call setState here., or HTTP requests
+
+c. render,
+
+d. getSnapShotBeforeUpdate(prevProps, prevState):
+
+- rarely used
+- called right before the changes from virual DOM are to be reflected in the DOM.
+- used when we need to capture info from the DOM.
+- returns null, or a value.
+- returned value will be passed as 3rd parameter for componentDidUpdate() 
+
+
+e. componentDidUpdate(prevProps, prevState, snapshot)
+
+- called after the render is finished in re-render cycles.
+- guarenteed to be caled only once in any re-render cycle.
+- Can cause side effects.
+we should compare the prevState/prevProps values with the current ones, before making any AJAX calls - good practice.
+
+execution order when state is changed.
+
+Parent getDerivedStateFromProps
+Parent shouldComponentUpdate
+Parent render
+    Child getDerivedStateFromProps
+    Child shouldComponentUpdate
+    Child render
+    Child getSnapshotBeforeUpdate
+Parent getSnapshotBeforeUpdate
+    Child componentDidUpdate
+Parent componentDidUpdate
+
+
+===============================================
+
+3. Unmounting
+
+    componentWillUnmount
+- method id invoked immediately before a component is unmounted and destroyed.
+- never call setState method here.
+- we can do following things here:
+    cancelling any network requests
+    removing event handlers
+    cancelling any subscriptions
+    invalidating timers
+
